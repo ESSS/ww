@@ -1,7 +1,3 @@
-@echo off
-
-setlocal
-
 :: ww - The multiple-workspace batch script
 ::
 :: Minimum folder structure for an environment:
@@ -18,6 +14,12 @@ setlocal
 :: WW_PROJECTS_SUBDIR: subdirectory of workspace where projects are clones. Default: Projects
 :: WW_QUIET:           if defined, ww will not print normal messages (only error ones).
 :: WW_CREATE:          if defined, ww will create every PATH it tries to access (but not the root one)
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+@echo off
+setlocal
+goto PARSE_ARGS
+
 
 if [%1] equ [] if [%WW_CURRENT_WORKSPACE%] == [] goto USAGE
 if [%1] equ [] goto SHOW_CURRENT_WORKSPACE
