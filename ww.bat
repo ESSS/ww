@@ -145,7 +145,12 @@ exit /b 1
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :SHOW_CURRENT_WORKSPACE
-echo Current workspace: %WW_CURRENT_WORKSPACE%
+echo Current workspace:  %WW_CURRENT_WORKSPACE%
+echo WW_DEFAULT_VOLUME:  %WW_DEFAULT_VOLUME%
+echo WW_SHARED_DIR:      %WW_SHARED_DIR%
+echo WW_PROJECTS_SUBDIR: %WW_PROJECTS_SUBDIR%
+echo WW_QUIET:           %WW_QUIET%
+echo.
 conda info
 mu status
 goto :eof
