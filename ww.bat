@@ -101,6 +101,7 @@ if not exist %_WW_WORKSPACE% (
     echo You can try creating a new one using %0 -c %1
     exit /b 1
 )
+set WW_CURRENT_WORKSPACE=%_WW_WORKSPACE%
 
 if not defined WW_QUIET echo Initializing workspace %WW_CURRENT_WORKSPACE%...
 
