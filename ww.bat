@@ -11,7 +11,8 @@
 :: Environment variables that can be previously defined (suggestion: define them as system variables)
 :: For more information, see :DEFINE_GLOBAL_VARIABLES function in this file.
 ::
-:: WW_DEFAULT_VOLUME:  Default volume to be used in ww.
+:: WW_DEFAULT_VOLUMES: Default volumes to be used in ww. Can be a list separated by ','.
+::                     Example: set WW_DEFAULT_VOLUMES=W,D,C
 :: WW_SHARED_DIR:      Point to PATH of Shared used by aa.
 :: WW_PROJECTS_SUBDIR: Subdirectory of workspace where projects are clones.
 :: WW_QUIET:           If defined, ww will not print normal messages (only error ones).
@@ -46,7 +47,7 @@ goto SETUP_WORKSPACE
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :DEFINE_GLOBAL_VARIABLES
 if not defined WW_PROJECTS_SUBDIR set WW_PROJECTS_SUBDIR=Projects
-if not defined WW_DEFAULT_VOLUME set WW_DEFAULT_VOLUME=W
+if not defined WW_DEFAULT_VOLUMES set WW_DEFAULT_VOLUMES=W
 if not defined WW_SHARED_DIR set WW_SHARED_DIR=%WW_DEFAULT_VOLUME%:\Shared
 
 exit /b 0
@@ -56,11 +57,19 @@ exit /b 0
 :CREATE_ENV
 :: if args[2] == '', Show help
 if [%2] equ [] (
-    echo Expected workspace as second parameter. Example: ww --create 99
+    echo Expected workspace as second parameter. Example: %0% --create 99
     exit /b 1
 )
 
-set _NEW_WORKSPACE=%WW_DEFAULT_VOLUME%:\%2%
+:: Batch syntax sux, but the following line extracts the first element of a list of elements
+set _FIRST_VOLUME=%WW_DEFAULT_VOLUMES:,=&rem.%
+set _NEW_WORKSPACE=%_FIRST_VOLUME%:\%2%
+
+if exist %_NEW_WORKSPACE% (
+    echo Workspace %_NEW_WORKSPACE% already exist. To activate it, run %0 %2%
+    exit /b 1
+)
+
 set _PROJECTS_DIR=%_NEW_WORKSPACE%\%WW_PROJECTS_SUBDIR%
 set _TMP_DIR=%_NEW_WORKSPACE%\tmp
 set _CONDA_ENVS_PATH_DIR=%_NEW_WORKSPACE%\envs
@@ -71,6 +80,8 @@ mkdir %_PROJECTS_DIR% 2> NUL
 mkdir %_TMP_DIR% 2> NUL
 mkdir %_CONDA_ENVS_PATH_DIR% 2> NUL
 
+if not defined WW_QUIET echo Success! New workspace created in %_NEW_WORKSPACE%
+
 goto :eof
 
 
@@ -78,11 +89,18 @@ goto :eof
 :SETUP_WORKSPACE
 
 set _WW_WORKSPACE=%1
-if not exist %_WW_WORKSPACE%\ if exist D:\%_WW_WORKSPACE%\ set _WW_WORKSPACE=D:\%_WW_WORKSPACE%
-if not exist %_WW_WORKSPACE%\ if exist C:\%_WW_WORKSPACE%\ set _WW_WORKSPACE=C:\%_WW_WORKSPACE%
-if not exist %_WW_WORKSPACE%\ goto PATH_ERROR
-:: Change WW_CURRENT_WORKSPACE to absolute PATH, if it is still relative
-for /F "tokens=* delims=\" %%i in ("%_WW_WORKSPACE%") do set "WW_CURRENT_WORKSPACE=%%~fi"
+for %%i in (%WW_DEFAULT_VOLUMES%) do (
+    if not exist %_WW_WORKSPACE% (
+        if exist %%i:\%_WW_WORKSPACE%\ (
+            set _WW_WORKSPACE=%%i:\%_WW_WORKSPACE%\
+        )
+    )
+)
+if not exist %_WW_WORKSPACE% (
+    echo Couldn't find the workspace %1 in any volume in list (%WW_DEFAULT_VOLUMES%^)
+    echo You can try creating a new one using %0 -c %1
+    exit /b 1
+)
 
 if not defined WW_QUIET echo Initializing workspace %WW_CURRENT_WORKSPACE%...
 
