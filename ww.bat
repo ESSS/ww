@@ -14,7 +14,7 @@
 :: WW_DEFAULT_VOLUMES: Default volumes to be used in ww. Can be a list separated by ','.
 ::                     Example: set WW_DEFAULT_VOLUMES=W,D,C
 :: WW_SHARED_DIR:      Point to PATH of Shared used by aa.
-:: WW_PROJECTS_SUBDIR: Subdirectory of workspace where projects are clones.
+:: WW_PROJECTS_SUBDIR: Subdirectory of workspace where projects are cloned.
 :: WW_QUIET:           If defined, ww will not print normal messages (only error ones).
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -27,18 +27,18 @@ goto PARSE_ARGS
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :PARSE_ARGS
 :: if no args and no current workspace, Show help
-if [%1] equ [] if [%WW_CURRENT_WORKSPACE%] == [] goto USAGE
+if "%1" equ "" if "%WW_CURRENT_WORKSPACE%" == "" goto USAGE
 
 :: if args == --help or args == -h, Show help
-if [%1] equ [--help] goto USAGE
-if [%1] equ [-h] goto USAGE
+if "%1" equ "--help" goto USAGE
+if "%1" equ "-h" goto USAGE
 
 :: if args == --create <env_number> or args == -c <env_number>, createn env
-if [%1] equ [--create] goto CREATE_ENV
-if [%1] equ [-c] goto CREATE_ENV
+if "%1" equ "--create" goto CREATE_ENV
+if "%1" equ "-c" goto CREATE_ENV
 
 :: No args: Show current env
-if [%1] equ [] goto SHOW_CURRENT_WORKSPACE
+if "%1" equ "" goto SHOW_CURRENT_WORKSPACE
 
 :: Finally, has args and are none of the above, assume that have passed the workspace as argument
 goto SETUP_WORKSPACE
@@ -56,7 +56,7 @@ exit /b 0
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :CREATE_ENV
 :: if args[2] == '', Show help
-if [%2] equ [] (
+if "%2" equ "" (
     echo Expected workspace as second parameter. Example: %0% --create 99
     exit /b 1
 )
