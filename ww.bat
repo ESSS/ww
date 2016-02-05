@@ -13,7 +13,6 @@
 :: WW_SHARED_DIR:      point to PATH of Shared used by aa. Default: D:\Shared
 :: WW_PROJECTS_SUBDIR: subdirectory of workspace where projects are clones. Default: Projects
 :: WW_QUIET:           if defined, ww will not print normal messages (only error ones).
-:: WW_CREATE:          if defined, ww will create every PATH it tries to access (but not the root one)
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
@@ -21,9 +20,53 @@ setlocal
 goto PARSE_ARGS
 
 
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:PARSE_ARGS
+:: if no args and no current workspace, Show help
 if [%1] equ [] if [%WW_CURRENT_WORKSPACE%] == [] goto USAGE
+
+
+:: if args == --create <env_number> or args == -c <env_number>, createn env
+if [%1] equ [--create] goto CREATE_ENV
+if [%1] equ [-c] goto CREATE_ENV
+
+:: No args: Show current env
 if [%1] equ [] goto SHOW_CURRENT_WORKSPACE
+
+:: Finally, has args and are none of the above, assume that have passed the workspace as argument
 goto SETUP_WORKSPACE
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:CREATE_ENV
+:: if args[2] == '', Show help
+if [%2] equ [] (
+    echo Expected workspace as second parameter. Example: ww --create 99
+    exit /b 1
+)
+
+if "%WW_PROJECTS_SUBDIR%"=="" set WW_PROJECTS_SUBDIR=Projects
+
+set WW_DEFAULT_VOLUME=D:
+set WW_CURRENT_WORKSPACE=%WW_DEFAULT_VOLUME%\%2%
+set WW_PROJECTS_DIR=%WW_CURRENT_WORKSPACE%\%WW_PROJECTS_SUBDIR%
+set WW_TMP_DIR=%WW_CURRENT_WORKSPACE%\tmp
+set WW_CONDA_ENVS_PATH_DIR=%WW_CURRENT_WORKSPACE%\envs
+
+mkdir %WW_CURRENT_WORKSPACE% 2> NUL
+mkdir %WW_CURRENT_WORKSPACE%\aa_conf 2> NUL
+mkdir %WW_PROJECTS_DIR% 2> NUL
+mkdir %WW_TMP_DIR% 2> NUL
+mkdir %WW_CONDA_ENVS_PATH_DIR% 2> NUL
+
+goto :eof
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:SET_WW_WORKSPACE
+
+goto :eof
+
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :SETUP_WORKSPACE
@@ -43,17 +86,13 @@ if not defined WW_QUIET echo Initializing workspace %WW_CURRENT_WORKSPACE%...
 
 set WW_PROJECTS_DIR=%WW_CURRENT_WORKSPACE%\%WW_PROJECTS_SUBDIR%
 
-if defined WW_CREATE mkdir %WW_PROJECTS_DIR% 2> NUL
-
 :: Temporary folder will be overriden
 set TMP=%WW_CURRENT_WORKSPACE%\tmp
 set TEMP=%TMP%
 if not defined WW_QUIET echo TMP and TEMP variables have been updated!
-if defined WW_CREATE mkdir %TMP% 2> NUL
 
 :: Aasimar uses this configuration file to keep track of some env variables, so we need to make
 :: sure it won't use any global configuration file
-if defined WW_CREATE mkdir %WW_CURRENT_WORKSPACE%\aa_conf 2> NUL
 set AA_CONFIG_FILE=%WW_CURRENT_WORKSPACE%\aa_conf\aasimar10.conf
 if not exist %AA_CONFIG_FILE% (
     (
@@ -68,7 +107,6 @@ if not defined WW_QUIET echo AA_CONFIG_FILE variable have been updated!
 
 :: Update global conda envs path variable so that we isolate the workspace environment
 set CONDA_ENVS_PATH=%WW_CURRENT_WORKSPACE%\envs
-if defined WW_CREATE mkdir %CONDA_ENVS_PATH% 2> NUL
 if not defined WW_QUIET echo CONDA_ENVS_PATH variable have been updated!
 
 :: Isolate conda configuration file
