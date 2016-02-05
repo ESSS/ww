@@ -9,14 +9,17 @@
 ::     - tmp
 ::
 :: Environment variables that can be previously defined (suggestion: define them as system variables)
+:: For more information, see :DEFINE_GLOBAL_VARIABLES function in this file.
 ::
-:: WW_SHARED_DIR:      point to PATH of Shared used by aa. Default: D:\Shared
-:: WW_PROJECTS_SUBDIR: subdirectory of workspace where projects are clones. Default: Projects
-:: WW_QUIET:           if defined, ww will not print normal messages (only error ones).
+:: WW_DEFAULT_VOLUME:  Default volume to be used in ww.
+:: WW_SHARED_DIR:      Point to PATH of Shared used by aa.
+:: WW_PROJECTS_SUBDIR: Subdirectory of workspace where projects are clones.
+:: WW_QUIET:           If defined, ww will not print normal messages (only error ones).
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
 setlocal
+call :DEFINE_GLOBAL_VARIABLES
 goto PARSE_ARGS
 
 
@@ -41,6 +44,15 @@ goto SETUP_WORKSPACE
 
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:DEFINE_GLOBAL_VARIABLES
+if not defined WW_PROJECTS_SUBDIR set WW_PROJECTS_SUBDIR=Projects
+if not defined WW_DEFAULT_VOLUME set WW_DEFAULT_VOLUME=W
+if not defined WW_SHARED_DIR set WW_SHARED_DIR=%WW_DEFAULT_VOLUME%:\Shared
+
+exit /b 0
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :CREATE_ENV
 :: if args[2] == '', Show help
 if [%2] equ [] (
@@ -48,19 +60,16 @@ if [%2] equ [] (
     exit /b 1
 )
 
-if "%WW_PROJECTS_SUBDIR%"=="" set WW_PROJECTS_SUBDIR=Projects
+set _CURRENT_WORKSPACE=%WW_DEFAULT_VOLUME%:\%2%
+set _PROJECTS_DIR=%WW_CURRENT_WORKSPACE%\%WW_PROJECTS_SUBDIR%
+set _TMP_DIR=%WW_CURRENT_WORKSPACE%\tmp
+set _CONDA_ENVS_PATH_DIR=%WW_CURRENT_WORKSPACE%\envs
 
-set WW_DEFAULT_VOLUME=D:
-set WW_CURRENT_WORKSPACE=%WW_DEFAULT_VOLUME%\%2%
-set WW_PROJECTS_DIR=%WW_CURRENT_WORKSPACE%\%WW_PROJECTS_SUBDIR%
-set WW_TMP_DIR=%WW_CURRENT_WORKSPACE%\tmp
-set WW_CONDA_ENVS_PATH_DIR=%WW_CURRENT_WORKSPACE%\envs
-
-mkdir %WW_CURRENT_WORKSPACE% 2> NUL
-mkdir %WW_CURRENT_WORKSPACE%\aa_conf 2> NUL
-mkdir %WW_PROJECTS_DIR% 2> NUL
-mkdir %WW_TMP_DIR% 2> NUL
-mkdir %WW_CONDA_ENVS_PATH_DIR% 2> NUL
+mkdir %_CURRENT_WORKSPACE% 2> NUL
+mkdir %_CURRENT_WORKSPACE%\aa_conf 2> NUL
+mkdir %_PROJECTS_DIR% 2> NUL
+mkdir %_TMP_DIR% 2> NUL
+mkdir %_CONDA_ENVS_PATH_DIR% 2> NUL
 
 goto :eof
 
@@ -68,14 +77,10 @@ goto :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :SETUP_WORKSPACE
 
-if "%WW_SHARED_DIR%"=="" set WW_SHARED_DIR=D:\Shared
-if "%WW_PROJECTS_SUBDIR%"=="" set WW_PROJECTS_SUBDIR=Projects
-
 set _WW_WORKSPACE=%1
 if not exist %_WW_WORKSPACE%\ if exist D:\%_WW_WORKSPACE%\ set _WW_WORKSPACE=D:\%_WW_WORKSPACE%
 if not exist %_WW_WORKSPACE%\ if exist C:\%_WW_WORKSPACE%\ set _WW_WORKSPACE=C:\%_WW_WORKSPACE%
 if not exist %_WW_WORKSPACE%\ goto PATH_ERROR
-
 :: Change WW_CURRENT_WORKSPACE to absolute PATH, if it is still relative
 for /F "tokens=* delims=\" %%i in ("%_WW_WORKSPACE%") do set "WW_CURRENT_WORKSPACE=%%~fi"
 
