@@ -25,6 +25,9 @@ goto PARSE_ARGS
 :: if no args and no current workspace, Show help
 if [%1] equ [] if [%WW_CURRENT_WORKSPACE%] == [] goto USAGE
 
+:: if args == --help or args == -h, Show help
+if [%1] equ [--help] goto USAGE
+if [%1] equ [-h] goto USAGE
 
 :: if args == --create <env_number> or args == -c <env_number>, createn env
 if [%1] equ [--create] goto CREATE_ENV
@@ -144,7 +147,14 @@ goto :eof
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :USAGE
-echo Usage: %0 workspace_path_or_number
-echo Example: %0 C:\1
-echo Example: %0 2
+echo Usage: %0 [OPTION] workspace_path_or_number
+echo ww - The multiple-workspace batch script
+echo.
+echo ^-c, --create       Create a new workspace folder structure in the given ^<number^>
+echo ^-h, --help         Show this help
+echo.
+echo Examples:
+echo %0 -c 99
+echo %0 9
+echo.
 goto :eof
