@@ -8,20 +8,35 @@
 ::     - Projects
 ::     - tmp
 ::
-:: Environment variables that can be previously defined (suggestion: define them as system variables)
-:: For more information, see :DEFINE_GLOBAL_VARIABLES function in this file.
-::
-:: WW_DEFAULT_VOLUMES: Default volumes to be used in ww. Can be a list separated by ','.
-::                     Example: set WW_DEFAULT_VOLUMES=W,D,C
-:: WW_SHARED_DIR:      Point to PATH of Shared used by aa.
-:: WW_PROJECTS_SUBDIR: Subdirectory of workspace where projects are cloned.
-:: WW_QUIET:           If defined, ww will not print normal messages (only error ones).
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
 setlocal
 call :DEFINE_GLOBAL_VARIABLES
 goto PARSE_ARGS
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:USAGE
+:: Environment variables that can be previously defined (suggestion: define them as system variables)
+:: For more information, see :DEFINE_GLOBAL_VARIABLES function in this file.
+echo Usage: %0 [OPTION] workspace_path_or_number
+echo ww - The multiple-workspace batch script
+echo.
+echo You can configure the following environment variables, if needed:
+echo WW_DEFAULT_VOLUMES:  Volumes to be used in ww.                                        Default = W          Current = %WW_DEFAULT_VOLUMES%
+echo WW_SHARED_DIR:       Point to path of Shared used by aasimar.                         Default = W:/Shared  Current = %WW_SHARED_DIR%
+echo WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.             Default = Projects   Current = %WW_PROJECTS_SUBDIR%
+echo WW_QUIET:            If defined, ww will not print normal messages (only error ones). Default undefined    Current = %WW_QUIET%
+echo.
+echo ^-c, --create       Create a new workspace folder structure in the given ^<number^>
+echo ^-h, --help         Show this help
+echo.
+echo Examples:
+echo %0 -c 99
+echo %0 9
+echo.
+goto :eof
+
 
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -172,24 +187,4 @@ echo WW_QUIET:            %WW_QUIET%
 echo.
 conda info
 mu status
-goto :eof
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:USAGE
-echo Usage: %0 [OPTION] workspace_path_or_number
-echo ww - The multiple-workspace batch script
-echo.
-echo You can configure the following environment variables, if needed:
-echo WW_DEFAULT_VOLUMES:  Volumes to be used in ww.                                        Default = W          Current = %WW_DEFAULT_VOLUMES%
-echo WW_SHARED_DIR:       Point to path of Shared used by aasimar.                         Default = W:/Shared  Current = %WW_SHARED_DIR%
-echo WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.             Default = Projects   Current = %WW_PROJECTS_SUBDIR%
-echo WW_QUIET:            If defined, ww will not print normal messages (only error ones). Default undefined    Current = %WW_QUIET%
-echo.
-echo ^-c, --create       Create a new workspace folder structure in the given ^<number^>
-echo ^-h, --help         Show this help
-echo.
-echo Examples:
-echo %0 -c 99
-echo %0 9
-echo.
 goto :eof
