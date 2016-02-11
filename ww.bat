@@ -63,7 +63,6 @@ if "%2" equ "" (
 )
 
 :: Batch syntax sux, but the following line extracts the first element of a list of elements
-set _FIRST_VOLUME=%WW_DEFAULT_VOLUMES:,=&rem.%
 set _NEW_WORKSPACE=%_FIRST_VOLUME%:\%2%
 
 if exist %_NEW_WORKSPACE% (
