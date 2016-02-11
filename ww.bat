@@ -125,7 +125,8 @@ if not exist %_WW_WORKSPACE% (
     echo You can try creating a new one using %0 -c %1
     exit /b 1
 )
-set WW_CURRENT_WORKSPACE=%_WW_WORKSPACE%
+:: Change WW_CURRENT_WORKSPACE to absolute PATH, if it is still relative
+for /F "tokens=* delims=\" %%i in ("%_WW_WORKSPACE%") do set "WW_CURRENT_WORKSPACE=%%~fi"
 
 if not defined WW_QUIET echo Initializing workspace %WW_CURRENT_WORKSPACE%...
 
