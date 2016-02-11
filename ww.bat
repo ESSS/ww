@@ -7,13 +7,16 @@
 ::     - envs
 ::     - Projects
 ::     - tmp
+::     - ww_actitave.bat
 ::
+:: If ww_activate.bat is present, it is executed after the workspace is ready.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
 setlocal
 call :DEFINE_GLOBAL_VARIABLES
 goto PARSE_ARGS
+
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :USAGE
@@ -36,7 +39,6 @@ echo %0 -c 99
 echo %0 9
 echo.
 goto :eof
-
 
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -94,6 +96,13 @@ mkdir %_NEW_WORKSPACE%\aa_conf 2> NUL
 mkdir %_PROJECTS_DIR% 2> NUL
 mkdir %_TMP_DIR% 2> NUL
 mkdir %_CONDA_ENVS_PATH_DIR% 2> NUL
+
+echo :: ww Activate Script > %_NEW_WORKSPACE%\ww_activate.bat
+echo :: This script is called by ww script after loading the workspace >> %_NEW_WORKSPACE%\ww_activate.bat
+echo :: you can put environment variable initialization for specific environment here >> %_NEW_WORKSPACE%\ww_activate.bat
+echo. >> %_NEW_WORKSPACE%\ww_activate.bat
+echo @echo off >> %_NEW_WORKSPACE%\ww_activate.bat
+echo echo Don^'t forget to configure %_NEW_WORKSPACE%\ww_activate.bat >> %_NEW_WORKSPACE%\ww_activate.bat
 
 if not defined WW_QUIET echo Success! New workspace created in %_NEW_WORKSPACE%
 
@@ -169,6 +178,10 @@ endlocal & (
 )
 
 cd /d %WW_PROJECTS_DIR%
+
+if exist %WW_CURRENT_WORKSPACE%\ww_activate.bat (
+    call %WW_CURRENT_WORKSPACE%\ww_activate.bat
+)
 
 goto :eof
 
