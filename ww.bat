@@ -7,13 +7,16 @@
 ::     - envs
 ::     - Projects
 ::     - tmp
+::     - ww_actitave.bat
 ::
+:: If ww_activate.bat is present, it is executed after the workspace is ready.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
 setlocal
 call :DEFINE_GLOBAL_VARIABLES
 goto PARSE_ARGS
+
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :USAGE
@@ -36,7 +39,6 @@ echo %0 -c 99
 echo %0 9
 echo.
 goto :eof
-
 
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -95,6 +97,14 @@ mkdir %_PROJECTS_DIR% 2> NUL
 mkdir %_TMP_DIR% 2> NUL
 mkdir %_CONDA_ENVS_PATH_DIR% 2> NUL
 
+echo :: ww Activate Script > %_NEW_WORKSPACE%\ww_activate.bat
+echo :: This script is called by ww script after loading the workspace >> %_NEW_WORKSPACE%\ww_activate.bat
+echo :: you can put environment variable initialization for specific environment here. >> %_NEW_WORKSPACE%\ww_activate.bat
+echo :: For example, set ESSS_DEBUG=python could be done. >> %_NEW_WORKSPACE%\ww_activate.bat
+echo. >> %_NEW_WORKSPACE%\ww_activate.bat
+echo @echo off >> %_NEW_WORKSPACE%\ww_activate.bat
+echo echo Don^'t forget to configure %_NEW_WORKSPACE%\ww_activate.bat >> %_NEW_WORKSPACE%\ww_activate.bat
+
 if not defined WW_QUIET echo Success! New workspace created in %_NEW_WORKSPACE%
 
 goto :eof
@@ -116,7 +126,8 @@ if not exist %_WW_WORKSPACE% (
     echo You can try creating a new one using %0 -c %1
     exit /b 1
 )
-set WW_CURRENT_WORKSPACE=%_WW_WORKSPACE%
+:: Change WW_CURRENT_WORKSPACE to absolute PATH, if it is still relative
+for /F "tokens=* delims=\" %%i in ("%_WW_WORKSPACE%") do set "WW_CURRENT_WORKSPACE=%%~fi"
 
 if not defined WW_QUIET echo Initializing workspace %WW_CURRENT_WORKSPACE%...
 
@@ -169,6 +180,10 @@ endlocal & (
 )
 
 cd /d %WW_PROJECTS_DIR%
+
+if exist %WW_CURRENT_WORKSPACE%\ww_activate.bat (
+    call %WW_CURRENT_WORKSPACE%\ww_activate.bat
+)
 
 goto :eof
 
