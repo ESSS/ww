@@ -1,27 +1,27 @@
-:: ww - The multiple-workspace batch script
-::
-:: Minimum folder structure for an environment:
-:: - env_number
-::     - aa_conf
-::         - aasimar10.conf
-::     - envs
-::     - Projects
-::     - tmp
-::     - ww_actitave.bat
-::
-:: If ww_activate.bat is present, it is executed after the workspace is ready.
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
+REM ww - The multiple-workspace batch script
+
+REM Minimum folder structure for an environment:
+REM - env_number
+REM     - aa_conf
+REM         - aasimar10.conf
+REM     - envs
+REM     - Projects
+REM     - tmp
+REM     - ww_actitave.bat
+
+REM If ww_activate.bat is present, it is executed after the workspace is ready.
+
+REM -----------------------------------------------------------------------------------------------
 setlocal
 call :DEFINE_GLOBAL_VARIABLES
 goto PARSE_ARGS
 
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+REM -----------------------------------------------------------------------------------------------
 :USAGE
-:: Environment variables that can be previously defined (suggestion: define them as system variables)
-:: For more information, see :DEFINE_GLOBAL_VARIABLES function in this file.
+REM Environment variables that can be previously defined (suggestion: define them as system variables)
+REM For more information, see :DEFINE_GLOBAL_VARIABLES function in this file.
 echo Usage: %0 [OPTION] workspace_path_or_number
 echo ww - The multiple-workspace batch script
 echo.
@@ -41,27 +41,27 @@ echo.
 goto :eof
 
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+REM -----------------------------------------------------------------------------------------------
 :PARSE_ARGS
-:: if no args and no current workspace, Show help
+REM if no args and no current workspace, Show help
 if "%1" equ "" if "%WW_CURRENT_WORKSPACE%" == "" goto USAGE
 
-:: if args == --help or args == -h, Show help
+REM if args == --help or args == -h, Show help
 if "%1" equ "--help" goto USAGE
 if "%1" equ "-h" goto USAGE
 
-:: if args == --create <env_number> or args == -c <env_number>, createn env
+REM if args == --create <env_number> or args == -c <env_number>, createn env
 if "%1" equ "--create" goto CREATE_ENV
 if "%1" equ "-c" goto CREATE_ENV
 
-:: No args: Show current env
+REM No args: Show current env
 if "%1" equ "" goto SHOW_CURRENT_WORKSPACE
 
-:: Finally, has args and are none of the above, assume that have passed the workspace as argument
+REM Finally, has args and are none of the above, assume that have passed the workspace as argument
 goto SETUP_WORKSPACE
 
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+REM -----------------------------------------------------------------------------------------------
 :DEFINE_GLOBAL_VARIABLES
 if not defined WW_PROJECTS_SUBDIR set WW_PROJECTS_SUBDIR=Projects
 if not defined WW_DEFAULT_VOLUMES set WW_DEFAULT_VOLUMES=W
@@ -71,7 +71,7 @@ if not defined WW_SHARED_DIR set WW_SHARED_DIR=%_FIRST_VOLUME%:\Shared
 exit /b 0
 
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+REM -----------------------------------------------------------------------------------------------
 :CREATE_ENV
 
 if "%2" equ "" (
@@ -79,8 +79,8 @@ if "%2" equ "" (
     exit /b 1
 )
 
-:: Check if it has a ':', in this case assumes it is already the complete PATH
-:: (the following assignment is needed because string replacement doesn't work with batch arguments)
+REM Check if it has a ':', in this case assumes it is already the complete PATH
+REM (the following assignment is needed because string replacement doesn't work with batch arguments)
 set _ARG2=%2
 if [%_ARG2::=%] NEQ [%_ARG2%] set _NEW_WORKSPACE=%2
 if not defined _NEW_WORKSPACE set _NEW_WORKSPACE=%_FIRST_VOLUME%:\%2%
@@ -113,7 +113,7 @@ if not defined WW_QUIET echo Success! New workspace created in %_NEW_WORKSPACE%
 goto :eof
 
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+REM -----------------------------------------------------------------------------------------------
 :SETUP_WORKSPACE
 
 set _WW_WORKSPACE=%1
@@ -129,20 +129,20 @@ if not exist %_WW_WORKSPACE% (
     echo You can try creating a new one using %0 -c %1
     exit /b 1
 )
-:: Change WW_CURRENT_WORKSPACE to absolute PATH, if it is still relative
+REM Change WW_CURRENT_WORKSPACE to absolute PATH, if it is still relative
 for /F "tokens=* delims=\" %%i in ("%_WW_WORKSPACE%") do set "WW_CURRENT_WORKSPACE=%%~fi"
 
 if not defined WW_QUIET echo Initializing workspace %WW_CURRENT_WORKSPACE%...
 
 set WW_PROJECTS_DIR=%WW_CURRENT_WORKSPACE%\%WW_PROJECTS_SUBDIR%
 
-:: Temporary folder will be overriden
+REM Temporary folder will be overriden
 set TMP=%WW_CURRENT_WORKSPACE%\tmp
 set TEMP=%TMP%
 if not defined WW_QUIET echo TMP and TEMP variables have been updated!
 
-:: Aasimar uses this configuration file to keep track of some env variables, so we need to make
-:: sure it won't use any global configuration file
+REM Aasimar uses this configuration file to keep track of some env variables, so we need to make
+REM sure it won't use any global configuration file
 set AA_CONFIG_FILE=%WW_CURRENT_WORKSPACE%\aa_conf\aasimar10.conf
 if not exist %AA_CONFIG_FILE% (
     (
@@ -155,23 +155,23 @@ if not exist %AA_CONFIG_FILE% (
 )
 if not defined WW_QUIET echo AA_CONFIG_FILE variable have been updated!
 
-:: Update global conda envs path variable so that we isolate the workspace environment
+REM Update global conda envs path variable so that we isolate the workspace environment
 set CONDA_ENVS_PATH=%WW_CURRENT_WORKSPACE%\envs
 if not defined WW_QUIET echo CONDA_ENVS_PATH variable have been updated!
 
-:: Isolate conda configuration file
+REM Isolate conda configuration file
 set "CONDARC=%WW_CURRENT_WORKSPACE%\.condarc"
 
-:: Create it copying from the root, if it doesn't already exist
+REM Create it copying from the root, if it doesn't already exist
 if not exist "%CONDARC%" for /F %%i in ('conda info --root') do copy "%%i\.condarc" "%CONDARC%" > NUL
 
 where RenameTab > NUL 2>&1
 if not errorlevel 1 call RenameTab [%WW_CURRENT_WORKSPACE%]
 
-:: That's it :)
+REM That's it :)
 if not defined WW_QUIET echo Ready to work!
 
-:: Export variables
+REM Export variables
 endlocal & (
     set WW_CURRENT_WORKSPACE=%WW_CURRENT_WORKSPACE%
     set TMP=%TMP%
@@ -190,12 +190,12 @@ if exist %WW_CURRENT_WORKSPACE%\ww_activate.bat (
 
 goto :eof
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+REM -----------------------------------------------------------------------------------------------
 :PATH_ERROR
 echo Could not find path %_WW_WORKSPACE% (or variants)
 exit /b 1
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+REM -----------------------------------------------------------------------------------------------
 :SHOW_CURRENT_WORKSPACE
 echo Current workspace:   %WW_CURRENT_WORKSPACE%
 echo WW_DEFAULT_VOLUMES:  %WW_DEFAULT_VOLUMES%
