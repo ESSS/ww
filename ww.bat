@@ -26,10 +26,18 @@ echo Usage: %0 [OPTION] workspace_path_or_number
 echo ww - The multiple-workspace batch script
 echo.
 echo You can configure the following environment variables, if needed:
-echo WW_DEFAULT_VOLUMES:  Volumes to be used in ww.                                        Default = W          Current = %WW_DEFAULT_VOLUMES%
-echo WW_SHARED_DIR:       Point to path of Shared used by aasimar.                         Default = W:/Shared  Current = %WW_SHARED_DIR%
-echo WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.             Default = Projects   Current = %WW_PROJECTS_SUBDIR%
-echo WW_QUIET:            If defined, ww will not print normal messages (only error ones). Default undefined    Current = %WW_QUIET%
+echo WW_DEFAULT_VOLUMES:  Volumes to be used in ww.
+echo     Default = W
+echo     Current = %WW_DEFAULT_VOLUMES%
+echo WW_SHARED_DIR:       Point to path of Shared used by aasimar.
+echo     Default = W:/Shared
+echo     Current = %WW_SHARED_DIR%
+echo WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.
+echo     Default = Projects
+echo     Current = %WW_PROJECTS_SUBDIR%
+echo WW_QUIET:            If defined, ww will not print normal messages (only error ones).
+echo     Default undefined
+echo     Current = %WW_QUIET%
 echo.
 echo ^-c, --create       Create a new workspace folder structure in the given ^<number^> or ^<full-directory^>
 echo ^-h, --help         Show this help
