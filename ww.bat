@@ -31,7 +31,7 @@ echo WW_SHARED_DIR:       Point to path of Shared used by aasimar.              
 echo WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.             Default = Projects   Current = %WW_PROJECTS_SUBDIR%
 echo WW_QUIET:            If defined, ww will not print normal messages (only error ones). Default undefined    Current = %WW_QUIET%
 echo.
-echo ^-c, --create       Create a new workspace folder structure in the given ^<number^>
+echo ^-c, --create       Create a new workspace folder structure in the given ^<number^> or ^<full-directory^>
 echo ^-h, --help         Show this help
 echo.
 echo Examples:
@@ -73,14 +73,17 @@ exit /b 0
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :CREATE_ENV
-:: if args[2] == '', Show help
+
 if "%2" equ "" (
     echo Expected workspace as second parameter. Example: %0% --create 99
     exit /b 1
 )
 
-:: Batch syntax sux, but the following line extracts the first element of a list of elements
-set _NEW_WORKSPACE=%_FIRST_VOLUME%:\%2%
+:: Check if it has a ':', in this case assumes it is already the complete PATH
+:: (the following assignment is needed because string replacement doesn't work with batch arguments)
+set _ARG2=%2
+if [%_ARG2::=%] NEQ [%_ARG2%] set _NEW_WORKSPACE=%2
+if not defined _NEW_WORKSPACE set _NEW_WORKSPACE=%_FIRST_VOLUME%:\%2%
 
 if exist %_NEW_WORKSPACE% (
     echo Workspace %_NEW_WORKSPACE% already exist. To activate it, run %0 %2%
