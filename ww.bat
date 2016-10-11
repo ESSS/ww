@@ -165,6 +165,8 @@ if not defined WW_QUIET echo AA_CONFIG_FILE variable have been updated!
 
 REM Update global conda envs path variable so that we isolate the workspace environment
 set CONDA_ENVS_PATH=%WW_CURRENT_WORKSPACE%\envs
+REM conda 4.2 does not respect CONDA_ENVS_PATH anymore: https://github.com/conda/conda/issues/3469
+call conda config --add envs_dirs "%CONDA_ENVS_PATH%"
 if not defined WW_QUIET echo CONDA_ENVS_PATH variable have been updated!
 
 REM Isolate conda configuration file
