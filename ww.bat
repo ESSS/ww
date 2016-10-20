@@ -173,6 +173,9 @@ set "CONDARC=%WW_CURRENT_WORKSPACE%\.condarc"
 REM Create it copying from the root, if it doesn't already exist
 if not exist "%CONDARC%" for /F %%i in ('conda info --root') do copy "%%i\.condarc" "%CONDARC%" > NUL
 
+REM conda 4.2 does not respect CONDA_ENVS_PATH anymore: https://github.com/conda/conda/issues/3469
+call conda config --add envs_dirs "%CONDA_ENVS_PATH%"
+
 where RenameTab > NUL 2>&1
 if not errorlevel 1 call RenameTab [%WW_CURRENT_WORKSPACE%]
 
