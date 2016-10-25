@@ -3,8 +3,6 @@ REM ww - The multiple-workspace batch script
 
 REM Minimum folder structure for an environment:
 REM - env_number
-REM     - aa_conf
-REM         - aasimar10.conf
 REM     - envs
 REM     - Projects
 REM     - tmp
@@ -29,9 +27,6 @@ echo You can configure the following environment variables, if needed:
 echo WW_DEFAULT_VOLUMES:  Volumes to be used in ww.
 echo     Default = W
 echo     Current = %WW_DEFAULT_VOLUMES%
-echo WW_SHARED_DIR:       Point to path of Shared used by aasimar.
-echo     Default = W:/Shared
-echo     Current = %WW_SHARED_DIR%
 echo WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.
 echo     Default = Projects
 echo     Current = %WW_PROJECTS_SUBDIR%
@@ -74,7 +69,6 @@ REM ----------------------------------------------------------------------------
 if not defined WW_PROJECTS_SUBDIR set WW_PROJECTS_SUBDIR=Projects
 if not defined WW_DEFAULT_VOLUMES set WW_DEFAULT_VOLUMES=W
 set _FIRST_VOLUME=%WW_DEFAULT_VOLUMES:,=&rem.%
-if not defined WW_SHARED_DIR set WW_SHARED_DIR=%_FIRST_VOLUME%:\Shared
 
 exit /b 0
 
@@ -103,7 +97,6 @@ set _TMP_DIR=%_NEW_WORKSPACE%\tmp
 set _CONDA_ENVS_PATH_DIR=%_NEW_WORKSPACE%\envs
 
 mkdir %_NEW_WORKSPACE% 2> NUL
-mkdir %_NEW_WORKSPACE%\aa_conf 2> NUL
 mkdir %_PROJECTS_DIR% 2> NUL
 mkdir %_TMP_DIR% 2> NUL
 mkdir %_CONDA_ENVS_PATH_DIR% 2> NUL
@@ -149,20 +142,6 @@ set TMP=%WW_CURRENT_WORKSPACE%\tmp
 set TEMP=%TMP%
 if not defined WW_QUIET echo TMP and TEMP variables have been updated!
 
-REM Aasimar uses this configuration file to keep track of some env variables, so we need to make
-REM sure it won't use any global configuration file
-set AA_CONFIG_FILE=%WW_CURRENT_WORKSPACE%\aa_conf\aasimar10.conf
-if not exist %AA_CONFIG_FILE% (
-    (
-        echo [system]
-        echo flags = LIST:conda
-        echo platform = STRING:win64
-        echo projects_dir = PATH:%WW_PROJECTS_DIR%
-        echo shared_dir = PATH:%WW_SHARED_DIR%
-    ) > %AA_CONFIG_FILE%
-)
-if not defined WW_QUIET echo AA_CONFIG_FILE variable have been updated!
-
 REM Update global conda envs path variable so that we isolate the workspace environment
 set CONDA_ENVS_PATH=%WW_CURRENT_WORKSPACE%\envs
 if not defined WW_QUIET echo CONDA_ENVS_PATH variable have been updated!
@@ -174,7 +153,7 @@ REM Create it copying from the root, if it doesn't already exist
 if not exist "%CONDARC%" for /F %%i in ('conda info --root') do copy "%%i\.condarc" "%CONDARC%" > NUL
 
 REM conda 4.2 does not respect CONDA_ENVS_PATH anymore: https://github.com/conda/conda/issues/3469
-call conda config --add envs_dirs "%CONDA_ENVS_PATH%"
+call conda config --add envs_dirs "%CONDA_ENVS_PATH%" 2> NUL
 
 where RenameTab > NUL 2>&1
 if not errorlevel 1 call RenameTab [%WW_CURRENT_WORKSPACE%]
@@ -188,7 +167,6 @@ endlocal & (
     set TMP=%TMP%
     set TEMP=%TEMP%
     set WW_PROJECTS_DIR=%WW_PROJECTS_DIR%
-    set AA_CONFIG_FILE=%AA_CONFIG_FILE%
     set CONDA_ENVS_PATH=%CONDA_ENVS_PATH%
     set CONDARC=%CONDARC%
 )
@@ -210,7 +188,6 @@ REM ----------------------------------------------------------------------------
 :SHOW_CURRENT_WORKSPACE
 echo Current workspace:   %WW_CURRENT_WORKSPACE%
 echo WW_DEFAULT_VOLUMES:  %WW_DEFAULT_VOLUMES%
-echo WW_SHARED_DIR:       %WW_SHARED_DIR%
 echo WW_PROJECTS_SUBDIR:  %WW_PROJECTS_SUBDIR%
 echo WW_QUIET:            %WW_QUIET%
 echo.
