@@ -119,8 +119,8 @@ REM ----------------------------------------------------------------------------
 
 set _WW_WORKSPACE=%1
 for %%i in (%WW_DEFAULT_VOLUMES%) do (
-    if not exist %_WW_WORKSPACE% (
-        if exist %%i:\%_WW_WORKSPACE%\ (
+    if not exist %_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
+        if exist %%i:\%_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
             set _WW_WORKSPACE=%%i:\%_WW_WORKSPACE%
         )
     )
