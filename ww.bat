@@ -125,7 +125,7 @@ for %%i in (%WW_DEFAULT_VOLUMES%) do (
         )
     )
 )
-if not exist %_WW_WORKSPACE% (
+if not exist %_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
     echo Couldn't find the workspace %1 in any volume in list (%WW_DEFAULT_VOLUMES%^)
     echo You can try creating a new one using %0 -c %1
     exit /b 1
