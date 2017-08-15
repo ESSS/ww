@@ -154,6 +154,9 @@ if not exist "%CONDARC%" for /F %%i in ('conda info --root') do copy "%%i\.conda
 
 REM conda 4.2 does not respect CONDA_ENVS_PATH anymore: https://github.com/conda/conda/issues/3469
 call conda config --add envs_dirs "%CONDA_ENVS_PATH%" 2> NUL
+REM In some version conda added a configuration to override the packages cache.
+REM If not set it default to the root cache.
+call conda config --add pkgs_dirs "%CONDA_ENVS_PATH%\.pkgs" 2> NUL
 
 where RenameTab > NUL 2>&1
 if not errorlevel 1 call RenameTab [%WW_CURRENT_WORKSPACE%]
