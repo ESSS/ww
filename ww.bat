@@ -33,6 +33,10 @@ echo     Current = %WW_PROJECTS_SUBDIR%
 echo WW_QUIET:            If defined, ww will not print normal messages (only error ones).
 echo     Default undefined
 echo     Current = %WW_QUIET%
+echo WW_CONDA_PKGS_PATH:   If defined, will set location where conda packages will be cached. Otherwise
+echo                       it will use the default location %%CONDA_INSTALL_DIR%%\pkgs
+echo     Default undefined
+echo     Current = %WW_CONDA_PKGS_PATH%
 echo.
 echo ^-c, --create       Create a new workspace folder structure in the given ^<number^> or ^<full-directory^>
 echo ^-h, --help         Show this help
@@ -144,6 +148,13 @@ if not defined WW_QUIET echo TMP and TEMP variables have been updated!
 
 REM Update global conda envs path variable so that we isolate the workspace environment
 set CONDA_ENVS_PATH=%WW_CURRENT_WORKSPACE%\envs
+
+REM Find where conda is installed
+for /F "usebackq delims=" %%i in (`conda info --root`) do set "_CONDA_ROOT=%%i"
+set CONDA_PKGS_PATH=%_CONDA_ROOT%\pkgs
+
+if defined WW_CONDA_PKGS_PATH set CONDA_PKGS_PATH=%WW_CONDA_PKGS_PATH%
+
 if not defined WW_QUIET echo CONDA_ENVS_PATH variable have been updated!
 
 REM Isolate conda configuration file
@@ -156,7 +167,7 @@ REM conda 4.2 does not respect CONDA_ENVS_PATH anymore: https://github.com/conda
 call conda config --file "%CONDARC%" --add envs_dirs "%CONDA_ENVS_PATH%" 2> NUL
 REM In some version conda added a configuration to override the packages cache.
 REM If not set it default to the root cache.
-call conda config --file "%CONDARC%" --add pkgs_dirs "%CONDA_ENVS_PATH%\.pkgs" 2> NUL
+call conda config --file "%CONDARC%" --add pkgs_dirs "%CONDA_PKGS_PATH%" 2> NUL
 
 where RenameTab > NUL 2>&1
 if not errorlevel 1 call RenameTab [%WW_CURRENT_WORKSPACE%]
