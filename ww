@@ -1,0 +1,124 @@
+#!/bin/bash
+#
+# ww - The multiple-workspace batch script
+#
+# Minimum folder structure for an environment:
+# - env_name
+#     - envs
+#     - Projects
+#     - ww_activate.sh
+#
+# If ww_activate.sh is present, it is sourced after the workspace is ready.
+set -o pipefail
+
+activate() {
+  if [ -z "$sourced" ]; then
+    errorOut "use 'source ww $1'"
+  fi
+  
+  workspace="${WW_DEFAULT_PATH}/${1}"
+  echo Activating $workspace...
+  source "${workspace}/ww_activate.sh"
+  cd "${workspace}/${WW_PROJECTS_SUBDIR}"
+  export CONDA_ENVS_PATH="${workspace}/envs"
+  export CONDARC="${workspace}/.condarc"
+  if [[ -n $WW_CONDA_PKGS_PATH ]]; then
+    export CONDA_PKGS_PATH=$WW_CONDA_PKGS_PATH
+  fi
+  
+}
+
+create() {
+  if [ -z "$1" ]; then
+    errorOut "Expected workspace as second parameter. Example: $0 -c 99"
+  fi
+
+  _NEW_WORKSPACE="${WW_DEFAULT_PATH}/${1}"
+  
+  mkdir "$_NEW_WORKSPACE"
+  mkdir "${_NEW_WORKSPACE}/${WW_PROJECTS_SUBDIR}"
+
+  CONDA_ROOT=$(conda info --root)
+  cp "${CONDA_ROOT}/.condarc" "${_NEW_WORKSPACE}/.condarc"
+
+  ACTIVATE_SCRIPT="${_NEW_WORKSPACE}/ww_activate.sh"
+  touch "$ACTIVATE_SCRIPT"
+  echo "# ww Activate Script" > "$ACTIVATE_SCRIPT"
+  echo "# This script is called by ww script after loading the workspace" >> "$ACTIVATE_SCRIPT"
+  echo "# you can put environment variable initialization for specific environment here." >> "$ACTIVATE_SCRIPT"
+  echo "# For example, export ESSS_DEBUG=python could be done." >> "$ACTIVATE_SCRIPT"
+  echo "" >> "$ACTIVATE_SCRIPT"
+
+  echo "Workspace created. Run \"source ww ${_NEW_WORKSPACE}\" to activate."
+}
+
+
+define_globals() {
+  [[ -z $WW_DEFAULT_PATH ]] && WW_DEFAULT_PATH=~/w
+  [[ -z $WW_PROJECTS_SUBDIR ]] && WW_PROJECTS_SUBDIR=Projects
+}
+
+help() {
+  _docs="
+  Usage: %0 [OPTION] workspace_path_or_number
+  ww - The multiple-workspace batch script
+
+  You can configure the following environment variables, if needed:
+
+  WW_DEFAULT_PATH:  Volumes to be used in ww.
+         Default = ~/w
+         Current = $WW_DEFAULT_PATH
+  WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.
+         Default = Projects
+         Current = $WW_PROJECTS_SUBDIR
+  WW_CONDA_PKGS_PATH:   If defined, will set location where conda packages will be cached. Otherwise
+                        it will use the default location %%CONDA_INSTALL_DIR%%\pkgs
+         Default = 
+         Current = $WW_CONDA_PKGS_PATH
+
+     -c, --create       Create a new workspace folder structure in the given ^<number^> or ^<full-directory^>
+     -h, --help         Show this help
+
+  Examples:
+  $0 -c 99
+  source $0 9
+  "
+  echo "$_docs"
+  
+}
+
+errorOut() {
+  echo "ERROR: $@" 1>&2
+  exit 1
+}
+
+
+# How to detect if a script is being sourced
+# https://stackoverflow.com/a/28776166/885117
+if [ -n "$ZSH_EVAL_CONTEXT" ]; then 
+    case $ZSH_EVAL_CONTEXT in *:file) sourced=1;; esac
+elif [ -n "$BASH_VERSION" ]; then
+    (return 0 2>/dev/null) && sourced=1
+else # All other shells: examine $0 for known shell binary filenames
+    # Detects `sh` and `dash`; add additional shell filenames as needed.
+    case ${0##*/} in sh|dash) sourced=1;; esac  
+fi
+
+
+define_globals
+
+while [ $# -gt 0 ]
+do
+  case "$1" in
+    -c ) create $2
+         exit
+      ;;
+    -h ) help
+         exit
+      ;;
+    *  ) activate $1
+      ;;
+  esac
+  shift
+done
+
