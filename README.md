@@ -24,8 +24,11 @@ The default location for workspace creation is the root of the volume `W:`.
 To change default workspace location you need to override the environment variable `WW_DEFAULT_VOLUMES`
 
 ```
-setx WW_DEFAULT_VOLUMES=<VOLUME>
+setx WW_DEFAULT_VOLUMES <VOLUME>
+set WW_DEFAULT_VOLUMES=<VOLUME>
 ```
+
+The `setx` command will persist the change between sessions while the `set` command will make the change for the current session.
 
 #### Linux
 
