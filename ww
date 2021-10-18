@@ -49,7 +49,7 @@ create() {
   echo "# For example, export ESSS_DEBUG=python could be done." >> "$ACTIVATE_SCRIPT"
   echo "" >> "$ACTIVATE_SCRIPT"
 
-  echo "Workspace created. Run \"source ww ${_NEW_WORKSPACE}\" to activate."
+  echo "Workspace created. Run \"source ww ${1}\" to activate."
 }
 
 
