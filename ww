@@ -35,7 +35,6 @@ create() {
 
   _NEW_WORKSPACE="${WW_DEFAULT_PATH}/${1}"
 
-  mkdir -p "${_NEW_WORKSPACE}"
   mkdir -p "${_NEW_WORKSPACE}/${WW_PROJECTS_SUBDIR}"
 
   CONDA_ROOT=$(conda info --root)
