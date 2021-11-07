@@ -16,7 +16,13 @@ activate() {
     errorOut "use 'source ww $1'"
   fi
 
-  workspace="${WW_DEFAULT_PATH}/${1}"
+  # If provided workspace is a absolute path, use it as so. If not, then make
+  # it absolute.
+  workspace="${1}"
+  if [[ "${workspace}" != /* ]]; then
+      workspace="${WW_DEFAULT_PATH}/${1}"
+  fi
+
   echo Activating $workspace...
   source "${workspace}/ww_activate.sh"
   cd "${workspace}/${WW_PROJECTS_SUBDIR}"
