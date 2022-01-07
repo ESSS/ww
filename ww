@@ -16,11 +16,12 @@ activate() {
     errorOut "use 'source ww $1'"
   fi
 
-  # If provided workspace is a absolute path, use it as so. If not, then make
-  # it absolute.
-  workspace="${1}"
-  if [[ "${workspace}" != /* ]]; then
-      workspace="${WW_DEFAULT_PATH}/${1}"
+  local workspace="${1}"
+
+  # Checks it provided workspace fits as a relative path.
+  # If not, then consider it an absolute path.
+  if [ -d "${WW_DEFAULT_PATH}/${workspace}" ]; then
+    workspace="${WW_DEFAULT_PATH}/${workspace}"
   fi
 
   echo Activating $workspace...
