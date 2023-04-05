@@ -17,6 +17,9 @@ activate() {
   fi
 
   local workspace="${1}"
+  local skip_navigation="${2}"
+
+  export WW_CURRENT_WORKSPACE=$workspace
 
   # Checks it provided workspace fits as a relative path.
   # If not, then consider it an absolute path.
@@ -25,14 +28,26 @@ activate() {
   fi
 
   echo Activating $workspace...
-  source "${workspace}/ww_activate.sh"
-  cd "${workspace}/${WW_PROJECTS_SUBDIR}"
+  if [[ -z $skip_navigation ]]; then
+    cd "${workspace}/${WW_PROJECTS_SUBDIR}"
+  fi
   export CONDA_ENVS_PATH="${workspace}/envs"
   export CONDARC="${workspace}/.condarc"
   if [[ -n $WW_CONDA_PKGS_PATH ]]; then
     export CONDA_PKGS_PATH=$WW_CONDA_PKGS_PATH
   fi
+}
 
+activate_current() {
+  if [ -z "$sourced" ]; then
+    errorOut "use 'source ww .'"
+  fi
+
+  local current_path=$(pwd)
+  local path_from_ww_root=${current_path#*$WW_DEFAULT_PATH/};
+  local workspace_name=${path_from_ww_root%%/*};
+
+  activate $workspace_name 1
 }
 
 create() {
@@ -88,6 +103,11 @@ help() {
   Examples:
   $0 -c 99
   source $0 9
+
+  # enable current workspace root from inside folder 
+  $0 -c wp1
+  cd $WW_DEFAULT_PATH/wp1/Projects
+  source $0 .
   "
   echo "$_docs"
 
@@ -121,6 +141,8 @@ do
       ;;
     -h ) help
          exit
+      ;;
+    . ) activate_current
       ;;
     *  ) activate $1
       ;;
