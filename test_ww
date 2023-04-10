@@ -1,0 +1,62 @@
+#!/bin/bash
+
+assert_equal() {
+    if [ $1 != $2 ]; then
+        errorOut "Assertion failed: $1 is not equal to $2'"
+    fi
+}
+
+test_can_activate_workspace() {
+    echo ""
+    echo "Testing ${FUNCNAME[0]}"
+    echo ""
+
+    local test_dir=$(pwd)
+
+    mkdir $test_dir/temp-ww-workdir
+    export WW_DEFAULT_PATH=$test_dir/temp-ww-workdir
+
+    $test_dir/ww -c ws1
+    source ./ww ws1
+    
+    # check that the correct workspace was activated
+    assert_equal $WW_CURRENT_WORKSPACE ws1
+    assert_equal $CONDA_ENVS_PATH $test_dir/temp-ww-workdir/ws1/envs
+
+    cd $test_dir
+    rm -rf temp-ww-workdir
+}
+
+
+test_can_activate_current() {
+    echo ""
+    echo "Testing ${FUNCNAME[0]}"
+    echo ""
+    local test_dir=$(pwd)
+
+    mkdir $test_dir/temp-ww-workdir
+    export WW_DEFAULT_PATH=$test_dir/temp-ww-workdir
+    
+    $test_dir/ww -c ws2
+
+    cd ./temp-ww-workdir/ws2/Projects
+    
+    local cwd_before=$(pwd)
+    source $test_dir/ww .
+
+    # check that the current work dir was not changed
+    local current_dir=$(pwd)
+    assert_equal $current_dir $cwd_before
+
+    # check that the correct workspace was activated
+    assert_equal $WW_CURRENT_WORKSPACE ws2
+    assert_equal $CONDA_ENVS_PATH $test_dir/temp-ww-workdir/ws2/envs
+
+    cd $test_dir
+    rm -rf temp-ww-workdir
+}
+
+echo "Testing file test_ww"
+test_can_activate_workspace
+test_can_activate_current
+echo "Success"

@@ -84,11 +84,24 @@ ww <workspace_name>
 
 #### Linux
 
-On `Linux` you need to `source` the workspace. Jus run:
+On `Linux` you need to `source` the workspace. Just run:
 
 ```
 source ww <workspace_name>
 ```
+
+##### Activate current
+
+It is also possible to activate a workspace from a subdir of a workspace root. If the cwd is at <workspace_name>/Projects/myproject for example, just run:
+
+```
+source ww .
+```
+
+The `<workspace_name>` will be activated without navigating to the workspace root folder. The cwd will still be at `<workspace_name>/Projects/myproject`.
+
+Note: This is a Linux-Only feature. 
+
 
 ### Get active workspace information 
 
