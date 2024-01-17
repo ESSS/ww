@@ -1,0 +1,65 @@
+#!/bin/bash
+#enable colors on CI
+export TERM=xterm-color
+
+test() {
+    local test_function=$1
+
+    echo -n "Testing ${test_function} ... "
+
+    setup
+
+    # run test function
+    output=$($test_function)
+    failed=$?
+
+    teardown
+
+    if [ $failed != 0 ]; then
+      printRed "Failed"
+      echo ""
+      echo "------------ Test Output ------------"
+      echo "$test_function:"
+      echo "$output"
+      exit 1
+    fi
+
+    printGreen "Success"
+}
+
+setup() {
+    test_dir=$(pwd)
+
+    rm -rf temp-ww-workdir
+    mkdir $test_dir/temp-ww-workdir
+    export WW_DEFAULT_PATH=$test_dir/temp-ww-workdir
+}
+
+teardown() {
+    cd $test_dir
+    rm -rf temp-ww-workdir
+}
+
+assert_equal() {
+    if [ $1 != $2 ]; then
+        testErrorOut "Assertion failed: $1 is not equal to $2'"
+    fi
+}
+
+testErrorOut() {
+  printRed "ERROR: $@" 
+  exit 1
+}
+
+printGreen() {
+    green=`tput setaf 2`
+    reset=`tput sgr0`
+    echo "${green}$1${reset}"
+}
+
+printRed() {
+    red=`tput setaf 1`
+    reset=`tput sgr0`
+    echo "${red}$1${reset}"
+}
+
