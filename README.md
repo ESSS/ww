@@ -75,8 +75,9 @@ ww <workspace_name>
 
 On `Linux` you need to `source` the workspace. Just run:
 
-```
+```bash
 source ww <workspace_name>
+cd <workspace-path>  # Unlike Windows, in Linux you must CD into workspace manually.
 ```
 
 ##### Activate current
