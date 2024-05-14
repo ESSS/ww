@@ -16,28 +16,17 @@ conda install ww
 
 ### Change default workspaces location
 
-`ww` will create new workspaces on a default location, but that location must exist. If one does not, you can either create it or tell `ww` you want it to create workspaces on a different (and existent) location.
+`ww` will create new workspaces on a default location, but that location must exist. If one does not, you can either create it or tell `ww` you want it to create workspaces on a different (and existent) location. The default location on Windows is the `W:\` and on Linux is `~/w`.
 
-#### Windows
+To change the default location, set the environment variable `WW_DEFAULT_PATH`:
 
-The default location for workspace creation is the root of the volume `W:`. 
-To change default workspace location you need to override the environment variable `WW_DEFAULT_VOLUMES`
+Windows:
 
-```
-setx WW_DEFAULT_VOLUMES <VOLUME>
-set WW_DEFAULT_VOLUMES=<VOLUME>
-```
+    set WW_DEFAULT_PATH=<DIR>
 
-The `setx` command will persist the change between sessions while the `set` command will make the change for the current session.
+Linux:
 
-#### Linux
-
-On linux the default location for workspace creation is the folder at `~/w`. 
-To change default workspace location you need to override the environment variable `WW_DEFAULT_PATH`
-
-```
-export WW_DEFAULT_PATH=<path>
-```
+    export WW_DEFAULT_PATH=<DIR>
 
 
 ## Folder structure of a workspace
@@ -86,8 +75,9 @@ ww <workspace_name>
 
 On `Linux` you need to `source` the workspace. Just run:
 
-```
+```bash
 source ww <workspace_name>
+cd <workspace-path>  # Unlike Windows, in Linux you must CD into workspace manually.
 ```
 
 ##### Activate current
@@ -97,11 +87,6 @@ It is also possible to activate a workspace from a subdir of a workspace root. I
 ```
 source ww .
 ```
-
-The `<workspace_name>` will be activated without navigating to the workspace root folder. The cwd will still be at `<workspace_name>/Projects/myproject`.
-
-Note: This is a Linux-Only feature. 
-
 
 ### Get active workspace information 
 

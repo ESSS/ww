@@ -24,10 +24,10 @@ echo Usage: %0 [OPTION] workspace_path_or_number
 echo ww - The multiple-workspace batch script
 echo.
 echo You can configure the following environment variables, if needed:
-echo WW_DEFAULT_VOLUMES:  Volumes to be used in ww.
+echo WW_DEFAULT_PATH:  Folder where workspaces will be stored.
 echo     Default = W
-echo     Current = %WW_DEFAULT_VOLUMES%
-echo WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.
+echo     Current = %WW_DEFAULT_PATH%
+echo WW_PROJECTS_SUBDIR:  Subdirectory of the workspace to store the source code.
 echo     Default = Projects
 echo     Current = %WW_PROJECTS_SUBDIR%
 echo WW_QUIET:            If defined, ww will not print normal messages (only error ones).
@@ -71,8 +71,7 @@ goto SETUP_WORKSPACE
 REM -----------------------------------------------------------------------------------------------
 :DEFINE_GLOBAL_VARIABLES
 if not defined WW_PROJECTS_SUBDIR set WW_PROJECTS_SUBDIR=Projects
-if not defined WW_DEFAULT_VOLUMES set WW_DEFAULT_VOLUMES=W
-set _FIRST_VOLUME=%WW_DEFAULT_VOLUMES:,=&rem.%
+if not defined WW_DEFAULT_PATH set WW_DEFAULT_PATH=W:
 
 exit /b 0
 
@@ -89,7 +88,18 @@ REM Check if it has a ':', in this case assumes it is already the complete PATH
 REM (the following assignment is needed because string replacement doesn't work with batch arguments)
 set _ARG2=%2
 if [%_ARG2::=%] NEQ [%_ARG2%] set _NEW_WORKSPACE=%2
-if not defined _NEW_WORKSPACE set _NEW_WORKSPACE=%_FIRST_VOLUME%:\%2%
+
+if not defined _NEW_WORKSPACE (
+    if defined WW_DEFAULT_VOLUMES (
+        REM Keeps support for WW_DEFAULT_VOLUMES, but should be deprecated in the future since
+        REM we don't know anyone using multiple volumes for ww.
+        set _FIRST_VOLUME=%WW_DEFAULT_VOLUMES:,=&rem.%
+        set _NEW_WORKSPACE=%_FIRST_VOLUME%:\%2%
+    ) else (
+        set _NEW_WORKSPACE=%WW_DEFAULT_PATH%\%2%
+        echo %_NEW_WORKSPACE%
+    )
+)
 
 if exist %_NEW_WORKSPACE% (
     echo Workspace %_NEW_WORKSPACE% already exist. To activate it, run %0 %2%
@@ -122,18 +132,26 @@ REM ----------------------------------------------------------------------------
 :SETUP_WORKSPACE
 
 set _WW_WORKSPACE=%1
-for %%i in (%WW_DEFAULT_VOLUMES%) do (
-    if not exist %_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
-        if exist %%i:\%_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
-            set _WW_WORKSPACE=%%i:\%_WW_WORKSPACE%
+
+if defined WW_DEFAULT_VOLUMES (
+    REM Keeps support for WW_DEFAULT_VOLUMES, but should be deprecated in the future since
+    REM we don't know anyone using multiple volumes for ww.
+    for %%i in (%WW_DEFAULT_VOLUMES%) do (
+        if not exist %_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
+            if exist %%i:\%_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
+                set _WW_WORKSPACE=%%i:\%_WW_WORKSPACE%
+            )
         )
     )
+    if not exist %_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
+        echo Couldn't find the workspace %1 in any volume in list (%WW_DEFAULT_VOLUMES%^)
+        echo You can try creating a new one using %0 -c %1
+        exit /b 1
+    )
+) else (
+    set _WW_WORKSPACE=%WW_DEFAULT_PATH%\%_WW_WORKSPACE%
 )
-if not exist %_WW_WORKSPACE%\%WW_PROJECTS_SUBDIR% (
-    echo Couldn't find the workspace %1 in any volume in list (%WW_DEFAULT_VOLUMES%^)
-    echo You can try creating a new one using %0 -c %1
-    exit /b 1
-)
+
 REM Change WW_CURRENT_WORKSPACE to absolute PATH, if it is still relative
 for /F "tokens=* delims=\" %%i in ("%_WW_WORKSPACE%") do set "WW_CURRENT_WORKSPACE=%%~fi"
 
@@ -201,6 +219,7 @@ exit /b 1
 REM -----------------------------------------------------------------------------------------------
 :SHOW_CURRENT_WORKSPACE
 echo Current workspace:   %WW_CURRENT_WORKSPACE%
+echo WW_DEFAULT_PATH:     %WW_DEFAULT_PATH%
 echo WW_DEFAULT_VOLUMES:  %WW_DEFAULT_VOLUMES%
 echo WW_PROJECTS_SUBDIR:  %WW_PROJECTS_SUBDIR%
 echo WW_QUIET:            %WW_QUIET%

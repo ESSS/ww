@@ -95,10 +95,10 @@ help() {
 
   You can configure the following environment variables, if needed:
 
-  WW_DEFAULT_PATH:  Volumes to be used in ww.
+  WW_DEFAULT_PATH:  Folder where workspaces will be stored.
          Default = ~/w
          Current = $WW_DEFAULT_PATH
-  WW_PROJECTS_SUBDIR:  Subdirectory of workspace where projects are cloned.
+  WW_PROJECTS_SUBDIR:  Subdirectory of the workspace to store the source code.
          Default = Projects
          Current = $WW_PROJECTS_SUBDIR
   WW_CONDA_PKGS_PATH:   If defined, will set location where conda packages will be cached. Otherwise
